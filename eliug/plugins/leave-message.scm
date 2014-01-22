@@ -20,12 +20,19 @@
   #:use-module (eliug irregex)
   #:use-module (irc irc)
   #:use-module ((irc message) #:renamer (symbol-prefix-proc 'msg:))
+  #:use-module (ice-9 ftw)
   #:export (leave-message-installer give-message-installer))
 
 (define leave-message-regex 
   (string->irregex (format #f "~a:[ ]*later tell ([^ ]+) (.*)$" *default-bot-name*)))
 
-;; TODO: finish store and load message
+(define (store-the-message who mg)
+  (define f (string-append *default-msg-dir* "/" who))
+  (and (not (file-exists? *default-msg-dir*)) (mkdir *default-msg-dir*))
+  (let ((fp (open-file f "a")))
+    (write mg fp)
+    (close fp)))
+
 (define (leave-message-installer irc)
   (lambda (msg)
     (define (check-who key body)
@@ -36,30 +43,43 @@
       (let ((who (and body (->who body)))
             (what (and body (->what body)))
             (from (from-who msg)))
-        (format #t "LMSG2: ~a, ~a~%" who what)
         (and who what
              (values who
                      (format #f "~a, ~a said: ~a" who from what)))))
     (cond
      ((bot-hit? msg "later tell" check-who)
       values => (lambda (who mg)
-           (store-the-message who ms)
-           (do-privmsg irc (msg:parse-target msg) "got it.")))
-           ;;(do-privmsg irc (msg:parse-target msg) mg)))
-     )))
+           (store-the-message who mg)
+           (do-privmsg irc (msg:parse-target msg) "got it."))))))
+
+(define (get-user u)
+  (define f (scandir *default-msg-dir* 
+                     (lambda (s) (string=? u s))))
+  (and (not (null? f)) u))
+
+(define (get-the-message u)
+  (define f (string-append *default-msg-dir* "/" u))
+  (let ((fp (open-input-file f)))
+    (let lp((str (read fp)) (ret '()))
+      (cond
+       ((eof-object? str) 
+        (close fp)
+        (delete-file f)
+        (reverse ret))
+       (else (lp (read fp) (cons str ret)))))))
 
 (define (give-message-installer irc)
   (lambda (msg)
-    (let ((cmd (msg:command msg))
-          (user (from-who msg)))
-      (format #t "GMI: ~a, ~a: ~a~%" user cmd *msg*))
+    (let* ((cmd (msg:command msg))
+           (user (from-who msg))
+           (muser (get-user user)))
     (cond
-     ((and *msg* (user-hit? msg "nalaginrut"))
-      => (lambda (mg)
-           (let ((lm (get-the-message "nalaginrut")))
-             (do-privmsg irc (msg:parse-target msg) 
-                         (format #f "welcome back ~a! you have ~a message~%"
-                                 user (length lm)))
-             (for-each (lambda (m) (do-privmsg irc (msg:parse-target msg) m))
-                       lm)
-             (set! *msg* #f)))))))
+     ((and muser (get-the-message muser))
+      => (lambda (ml)
+           (let ((len (length ml)))
+             (do-privmsg irc (current-channel)
+                         (format #f "welcome back ~a! you have ~a message~:[~;s~].~%"
+                                 user len (> len 1)))
+             (for-each 
+              (lambda (m) (do-privmsg irc (current-channel) m))
+              ml))))))))

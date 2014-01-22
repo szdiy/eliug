@@ -15,9 +15,12 @@
 
 (define-module (eliug config)
   #:export (*default-bot-name* *default-serv-name* *default-port*
-            *default-channel*))
+            *default-channel* *default-msg-dir* current-channel))
 
 (define *default-bot-name* "eliug")
 (define *default-serv-name* "irc.freenode.net")
 (define *default-port* 6667)
 (define *default-channel* "#szdiy")
+(define *default-msg-dir* "message")
+
+(define current-channel (make-parameter #f))

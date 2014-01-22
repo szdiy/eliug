@@ -39,4 +39,5 @@
   (do-connect irc)
   (do-register irc)
   (do-join irc channel)
-  (do-runloop irc))
+  (parameterize ((current-channel channel))
+    (do-runloop irc)))
