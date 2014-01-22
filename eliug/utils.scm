@@ -18,7 +18,8 @@
   #:use-module (eliug irregex)
   #:use-module (irc irc)
   #:use-module ((irc message) #:renamer (symbol-prefix-proc 'msg:))
-  #:export (->str bot-hit? from-who user-hit?))
+  #:export (->str bot-hit? from-who user-hit? default-bot-hit-regex
+            get-first-key))
 
 (define-syntax-rule (->str fmt args ...) (format #f fmt args ...))
 
@@ -37,6 +38,10 @@
 (define* (bot-hit? msg key #:optional (pred default-bot-hit-pred))
   (let ((body (msg:trailing msg)))
     (pred key body)))
+
+(define (get-first-key body)
+  (let ((m (irregex-search default-bot-hit-regex body)))
+    (and m (irregex-match-substring m 1))))
 
 (define (default-user-hit-pred act user who)
   (and (eq? act 'JOIN)

@@ -17,9 +17,11 @@
   #:use-module (eliug handlers)
   #:use-module (eliug plugins hello)
   #:use-module (eliug plugins roll)
-  #:use-module (eliug plugins leave-message))
+  #:use-module (eliug plugins leave-message)
+  #:use-module (eliug plugins praise))
   
 (define-eliug-plugin hello PRIVMSG hello-installer)
 (define-eliug-plugin roll PRIVMSG roll-installer)
 (define-eliug-plugin leave-message PRIVMSG leave-message-installer)
 (define-eliug-plugin give-message JOIN give-message-installer)
+(define-eliug-plugin praise PRIVMSG praise-installer)
