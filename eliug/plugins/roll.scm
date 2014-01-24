@@ -23,23 +23,40 @@
   #:export (roll-installer))
 
 (define (get-a-roll n)
-  (if (zero? n)
-      "0"
-      (object->string (random n *random-state*))))
+  (cond
+   ((zero? n) "0")
+   ((not (integer? n)) (get-a-roll (round n)))
+   ((< n 0) (format #f "-~a" (get-a-roll (- n))))
+   (else (object->string (random n *random-state*)))))
+
 
 (define roll-regex 
-  (string->irregex (format #f "~a:[ ]*roll ([0-9]+).*" *default-bot-name*)))
+  (string->irregex (format #f "~a:[ ]*([^ ]+) ([-.0-9]+)$" *default-bot-name*)))
 (define (check-roll key body)
   (define m (irregex-search roll-regex body))
-  (define (->key b) (and m (irregex-match-substring m 1)))
-  (define (->num b) (and m (irregex-match-substring m 3)))
+  (define (get n) (and m (irregex-match-substring m n)))
+  (define (->key b) (get 1))
+  (define (->num b) (get 2))
   (let ((k (and body (->key body)))
         (n (and body (->num body))))
-    (and k (string=? (string-trim-both k) key)
-         (and (string->number (string-trim-both n))))))
+    (format #t "re:~a, k: ~a, n: ~a~%" roll-regex k n)
+    (or (and k (string=? k key) ; hit the key ?
+             (and (not (string-null? n)) ; has number
+                  (and (not (string-null? n))
+                       (string->number (string-trim-both n)))))
+        "usuage is 'roll positive-integer'.")))
 
 (define (roll-installer irc)
   (lambda (msg)
-    (cond
-     ((bot-hit? msg "roll" check-roll)
-      => (lambda (n) (do-privmsg irc (msg:parse-target msg) (get-a-roll n)))))))
+    (let ((user (from-who msg)))
+      (cond
+       ((bot-hit? msg "roll" check-roll)
+        => (lambda (n)
+             (format #t "BBB3: ~a" n)
+             (cond
+              ((integer? n)
+               (let ((reply (format #f "~a got ~a." user (get-a-roll n))))
+                 (do-privmsg irc (msg:parse-target msg) reply)))
+              ((string? n)
+               (do-privmsg irc (msg:parse-target msg) n))
+              (else #f))))))))
