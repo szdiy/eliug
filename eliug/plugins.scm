@@ -15,6 +15,7 @@
 
 (define-module (eliug plugins)
   #:use-module (eliug handlers)
+  #:use-module (eliug config)
   #:use-module (eliug plugins hello)
   #:use-module (eliug plugins roll)
   #:use-module (eliug plugins leave-message)
@@ -25,3 +26,4 @@
 (define-eliug-plugin leave-message PRIVMSG leave-message-installer)
 (define-eliug-plugin give-message JOIN give-message-installer)
 (define-eliug-plugin praise PRIVMSG praise-installer)
+(and (not (file-exists? *default-msg-dir*)) (mkdir *default-msg-dir*))

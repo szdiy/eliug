@@ -28,7 +28,6 @@
 
 (define (store-the-message who mg)
   (define f (string-append *default-msg-dir* "/" who))
-  (and (not (file-exists? *default-msg-dir*)) (mkdir *default-msg-dir*))
   (let ((fp (open-file f "a")))
     (write mg fp)
     (close fp)))
