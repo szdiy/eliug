@@ -19,7 +19,7 @@
   #:use-module (irc irc)
   #:use-module ((irc message) #:renamer (symbol-prefix-proc 'msg:))
   #:export (->str bot-hit? from-who user-hit? default-bot-hit-regex
-            get-first-key))
+            get-first-key irc-hit?))
 
 (define-syntax-rule (->str fmt args ...) (format #f fmt args ...))
 
@@ -36,6 +36,10 @@
     (format #t "MMR2: ~a~%" bb)
     (and bb (string=? (string-trim-both bb) key))))
 (define* (bot-hit? msg key #:optional (pred default-bot-hit-pred))
+  (let ((body (msg:trailing msg)))
+    (pred key body)))
+
+(define* (irc-hit? msg key pred)
   (let ((body (msg:trailing msg)))
     (pred key body)))
 
