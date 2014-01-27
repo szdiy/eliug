@@ -29,7 +29,6 @@
    ((< n 0) (format #f "-~a" (get-a-roll (- n))))
    (else (object->string (random n *random-state*)))))
 
-
 (define roll-regex 
   (string->irregex (format #f "~a:[ ]*([^ ]+) ([-.0-9]+)$" *default-bot-name*)))
 (define (check-roll key body)
@@ -40,11 +39,12 @@
   (let ((k (and body (->key body)))
         (n (and body (->num body))))
     (format #t "re:~a, k: ~a, n: ~a~%" roll-regex k n)
-    (or (and k (string=? k key) ; hit the key ?
-             (and (not (string-null? n)) ; has number
-                  (and (not (string-null? n))
-                       (string->number (string-trim-both n)))))
-        "usuage is 'roll positive-integer'.")))
+    (if (and k (string=? k key)) ; hit the key ?
+        (or (and (not (string-null? n)) ; has number
+                 (and (not (string-null? n))
+                      (string->number (string-trim-both n)))) ; hit completely
+            "usuage is 'roll positive-integer'.") ; hit, but invalid usage
+        #f))) ; no hit
 
 (define (roll-installer irc)
   (lambda (msg)
