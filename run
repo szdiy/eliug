@@ -1,0 +1,5 @@
+#! /bin/bash
+
+guile -L ./ -c "((@ (eliug main) main))"
+
+
