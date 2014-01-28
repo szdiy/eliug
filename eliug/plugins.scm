@@ -19,7 +19,8 @@
   #:use-module (eliug plugins hello)
   #:use-module (eliug plugins roll)
   #:use-module (eliug plugins leave-message)
-  #:use-module (eliug plugins praise))
+  #:use-module (eliug plugins praise)
+  #:use-module (eliug plugins translate))
   
 (define-eliug-plugin hello PRIVMSG hello-installer)
 (define-eliug-plugin roll PRIVMSG roll-installer)
@@ -27,3 +28,4 @@
 (define-eliug-plugin give-message JOIN give-message-installer)
 (define-eliug-plugin praise PRIVMSG praise-installer)
 (and (not (file-exists? *default-msg-dir*)) (mkdir *default-msg-dir*))
+(define-eliug-plugin translate PRIVMSG translate-installer)
