@@ -40,7 +40,6 @@
     (let ((m (irregex-search re b)))
       (and m (irregex-match-substring m 1))))
   (let ((key (->key body)))
-    (format #t "XXX: ~a~%" key)
     (and key
          (let ((k (string-trim-both key)))
            ((@ (srfi srfi-1) any)

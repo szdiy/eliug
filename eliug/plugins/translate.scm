@@ -34,7 +34,6 @@
 (define *tr-re* (string->irregex "TRANSLATED_TEXT='([^']+)';" 'fast))
 (define (->result txt)
   (define m (irregex-search *tr-re* txt))
-  (format #t "->result: ~a~%" txt)
   (and m (irregex-match-substring m 1)))
 
 (define *hit-tr-re* (string->irregex ",tr (.*) << ([|a-zA-Z-]+)$")) 
@@ -44,14 +43,12 @@
   (define (trim s) (string-trim-both s))
   (define lang (and m (trim (get 2))))
   (define txt (and m (trim (get 1))))
-  (format #t "TRAN: body:~a, ~a, ~a~%" body lang txt)
   (cond
    ((not m) #f) ; no hit
    ((string-null? lang)
     "Are you kidding me?! What language do you want?")
    ((string-null? txt) "Are you mad? Where is the text to translate?!")
    (else 
-    (format #t "TRAN2: body:~a, ~a, ~a~%" body lang txt)
     (receive (r b) 
         (->google lang txt) 
       (let* ((len (string-length b))

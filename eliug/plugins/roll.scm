@@ -38,7 +38,6 @@
   (define (->num b) (get 2))
   (let ((k (and body (->key body)))
         (n (and body (->num body))))
-    (format #t "re:~a, k: ~a, n: ~a~%" roll-regex k n)
     (if (and k (string=? k key)) ; hit the key ?
         (or (and (not (string-null? n)) ; has number
                  (and (not (string-null? n))
@@ -52,7 +51,6 @@
       (cond
        ((bot-hit? msg "roll" check-roll)
         => (lambda (n)
-             (format #t "BBB3: ~a" n)
              (cond
               ((integer? n)
                (let ((reply (format #f "~a got ~a." user (get-a-roll n))))

@@ -38,7 +38,6 @@
       (define m (irregex-search leave-message-regex body))
       (define (->who b) (and m (irregex-match-substring m 1)))
       (define (->what b) (and m (irregex-match-substring m 2)))
-      (format #t "LMSG: ~a~%" body)
       (let ((who (and body (->who body)))
             (what (and body (->what body)))
             (from (from-who msg))
