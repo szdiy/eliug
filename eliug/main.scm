@@ -50,6 +50,7 @@
       (run-bot irc channel))))
 
 (define (main)
+  (setlocale LC_ALL "")
   (match (command-line)
    ((_) 
     (run-bot (make-bot)))
