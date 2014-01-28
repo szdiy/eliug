@@ -24,7 +24,7 @@
   #:export (leave-message-installer give-message-installer))
 
 (define leave-message-regex 
-  (string->irregex (format #f "~a:[ ]*later tell ([^ ]+) (.*)$" *default-bot-name*)))
+  (string->irregex (format #f "~a[:, ]*later tell ([^ ]+) (.*)$" *default-bot-name*)))
 
 (define (store-the-message who mg)
   (define f (string-append *default-msg-dir* "/" who))
@@ -41,10 +41,11 @@
       (format #t "LMSG: ~a~%" body)
       (let ((who (and body (->who body)))
             (what (and body (->what body)))
-            (from (from-who msg)))
+            (from (from-who msg))
+            (time (strftime "%Y/%m/%d %T" (localtime (current-time)))))
         (and who what
              (values who
-                     (format #f "~a, ~a said: ~a" who from what)))))
+                     (format #f "~a, ~a ~a said: ~a" who time from what)))))
     (cond
      ((bot-hit? msg "later tell" check-who)
       values => (lambda (who mg)
