@@ -23,11 +23,18 @@
   #:export (praise-installer))
 
 (define *praise-list*
-  '("nice" "good boy" "yeah" "great"))
+  '("nice" "good boy" "yeah" "great" "thanks" "well done" "well" "good"))
 
 (define *reply-list*
   '("你这么讨好我你老婆知道吗？"
-    "有句名言是这么说的，花功夫讨好机器人你就2了。"))
+    "有句名言是这么说的，花功夫讨好机器人你就2了。"
+    "某人曾经这么说过，把殷情留给女人，把刀剑留给男人。"
+    "不是我说你，整天泡在IRC里瞎捣蛋，你能找到媳妇么？"
+    "terry 叔叔曾经说过，停止空谈，开始泡妞～"
+    "我悄悄告诉你一个 atommann 的秘密，其实他不吃辣椒..."
+    "老刘让我转告你，年轻人大好时光怎么能不加班呢？！"
+    "其实我不是机器人， nalaginrut 才是。"
+    "麻哥曾经说过，停止烧烤，去老板那里吧！"))
 
 (define (get-a-reply)
   (list-ref *reply-list*
