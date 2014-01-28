@@ -37,11 +37,17 @@
   irc)
 
 (define* (run-bot irc #:optional (channel *default-channel*))
-  (do-connect irc)
-  (do-register irc)
-  (do-join irc channel)
-  (parameterize ((current-channel channel))
-    (do-runloop irc)))
+  (catch 'irc:network:eof
+    (lambda ()
+      (do-connect irc)
+      (do-register irc)
+      (do-join irc channel)
+      (parameterize ((current-channel channel))
+        (do-runloop irc)))
+    (lambda e
+      (format #t "ERROR: ~a~%" e)
+      (display "Restarting bot...\n")
+      (run-bot irc channel))))
 
 (define (main)
   (match (command-line)
