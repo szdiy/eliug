@@ -30,14 +30,14 @@
   (register-all-handlers irc))
 
 (define* (make-bot #:key (name *default-bot-name*)
-                   (server *default-serv-name*)
+                   (server (pick-a-server))
                    (port *default-port*))
   (define irc (make-irc #:nick name #:server server #:port port))
   (init-bot irc)
   irc)
 
 (define* (run-bot irc #:optional (channel *default-channel*))
-  (catch 'irc:network:eof
+  (catch #t
     (lambda ()
       (do-connect irc)
       (do-register irc)
@@ -47,7 +47,8 @@
     (lambda e
       (format #t "ERROR: ~a~%" e)
       (display "Restarting bot...\n")
-      (run-bot irc channel))))
+      (sleep 600)
+      (run-bot (make-bot #:name (nick irc)) channel))))
 
 (define (main)
   (setlocale LC_ALL "")
