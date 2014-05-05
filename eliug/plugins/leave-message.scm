@@ -24,7 +24,7 @@
   #:export (leave-message-installer give-message-installer))
 
 (define leave-message-regex 
-  (string->irregex (format #f "~a[:, ]*later tell ([^ ]+) (.*)$" *default-bot-name*)))
+  (string->irregex (format #f "~a[:, ：]*later tell ([^ ]+) (.*)$" *default-bot-name*)))
 
 (define (store-the-message who mg)
   (define f (string-append *default-msg-dir* "/" who))
@@ -35,10 +35,12 @@
 (define (leave-message-installer irc)
   (lambda (msg)
     (define (check-who key body)
+      (define (->trim b)
+	(and b (string-trim-both b (lambda (c) (memv c '(#\: #\, #\sp #\， #\： #\. #\。))))))
       (define m (irregex-search leave-message-regex body))
       (define (->who b) (and m (irregex-match-substring m 1)))
       (define (->what b) (and m (irregex-match-substring m 2)))
-      (let ((who (and body (->who body)))
+      (let ((who (->trim (and body (->who body))))
             (what (and body (->what body)))
             (from (from-who msg))
             (time (strftime "%Y/%m/%d %T" (localtime (current-time)))))
