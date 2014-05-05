@@ -22,6 +22,7 @@
   #:use-module ((irc message) #:renamer (symbol-prefix-proc 'msg:))
   #:use-module (web client)
   #:use-module (web uri)
+  #:use-module (web response)
   #:use-module (ice-9 receive)
   #:export (translate-installer))
 
@@ -29,7 +30,11 @@
   (define (-> lang txt)
     (format #f "http://translate.google.com.hk/?langpair=~a&text=~a"
             lang (uri-encode txt)))
-  (http-get (-> lang txt) #:headers '((User-agent . "Mozilla/5.0"))))
+  (catch #t
+    (lambda () 
+      (http-get (-> lang txt) #:headers '((User-agent . "Mozilla/5.0"))))
+    (lambda e
+      (values #f "网络有点不舒服，待会儿再试试..."))))
 
 (define *tr-re* (string->irregex "TRANSLATED_TEXT='([^']+)';" 'fast))
 (define (->result txt)
@@ -51,11 +56,14 @@
    (else 
     (receive (r b) 
         (->google lang txt) 
-      (let* ((len (string-length b))
-             (ret (->result (substring b (- len (+ 500 (string-length txt)))))))
-        (if (string=? ret txt)
-            "sorry I don't know."
-            (format #f "it means: ~a" ret)))))))
+      (cond
+       ((= (response-code r) 200)
+	(let* ((len (string-length b))
+	       (ret (->result (substring b (- len (+ 500 (string-length txt)))))))
+	  (if (string=? ret txt)
+	      "sorry I don't know."
+	      (format #f "it means: ~a" ret))))
+       (else (format #f "貌似股哥有点问题...(~a)" (response-code r))))))))
 
 (define (translate-installer irc)
   (lambda (msg)
