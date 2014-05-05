@@ -29,20 +29,24 @@
    ((< n 0) (format #f "-~a" (get-a-roll (- n))))
    (else (object->string (random n *random-state*)))))
 
+(define (get-items-roll items)
+  (let ((lst (regexp-split ",|，| " items)))
+    (list-ref lst (random (length lst) *random-state*))))
+
 (define roll-regex 
-  (string->irregex (format #f "~a:[ ]*([^ ]+) ([-.0-9]+)$" *default-bot-name*)))
+  (string->irregex (format #f "~a:[ ]*([^ ]+) (.*)$" *default-bot-name*)))
 (define (check-roll key body)
   (define m (irregex-search roll-regex body))
   (define (get n) (and m (irregex-match-substring m n)))
   (define (->key b) (get 1))
-  (define (->num b) (get 2))
+  (define (->what b) (get 2))
   (let ((k (and body (->key body)))
-        (n (and body (->num body))))
+        (n (and body (->what body))))
     (if (and k (string=? k key)) ; hit the key ?
         (or (and (not (string-null? n)) ; has number
                  (and (not (string-null? n))
                       (string->number (string-trim-both n)))) ; hit completely
-            "usuage is 'roll positive-integer'.") ; hit, but invalid usage
+            (get-items-roll n)) ; hit, but items
         #f))) ; no hit
 
 (define (roll-installer irc)

@@ -18,8 +18,16 @@
   #:use-module (eliug irregex)
   #:use-module (irc irc)
   #:use-module ((irc message) #:renamer (symbol-prefix-proc 'msg:))
-  #:export (->str bot-hit? from-who user-hit? default-bot-hit-regex
-            get-first-key irc-hit?))
+  #:use-module (srfi srfi-1)
+  #:use-module (ice-9 regex)
+  #:export (->str
+	    bot-hit?
+	    from-who
+	    user-hit?
+	    default-bot-hit-regex
+            get-first-key
+	    irc-hit?
+	    regexp-split))
 
 (define-syntax-rule (->str fmt args ...) (format #f fmt args ...))
 
@@ -55,3 +63,18 @@
         (user (from-who msg)))
     (format #t "UHIT: ~a, ~a~%" user cmd)
     (pred cmd user who)))
+
+(define* (regexp-split regex str #:optional (flags 0))
+  (let ((ret (fold-matches 
+              regex str (list '() 0 str)
+              (lambda (m prev)
+                (let* ((ll (car prev))
+                       (start (cadr prev))
+                       (tail (match:suffix m))
+                       (end (match:start m))
+                       (s (substring/shared str start end))
+                       (groups (map (lambda (n) (match:substring m n))
+                                    (iota (1- (match:count m)) 1))))
+                  (list `(,@ll ,s ,@groups) (match:end m) tail)))
+              flags)))
+    `(,@(car ret) ,(caddr ret))))
