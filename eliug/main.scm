@@ -45,9 +45,10 @@
       (parameterize ((current-channel channel))
         (do-runloop irc)))
     (lambda e
-      (format #t "ERROR: ~a~%" e)
-      (display "Restarting bot...\n")
-      (sleep 600)
+      (format #t "ERROR: ~a~%~!" e)
+      (format #t "Restarting bot...~%~!")
+      (sleep 1)
+      (do-quit irc)
       (run-bot (make-bot #:name (nick irc)) channel))))
 
 (define (main)
