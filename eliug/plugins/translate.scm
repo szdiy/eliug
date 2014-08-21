@@ -20,19 +20,21 @@
   #:use-module (eliug irregex)
   #:use-module (irc irc)
   #:use-module ((irc message) #:renamer (symbol-prefix-proc 'msg:))
-  #:use-module (web client)
   #:use-module (web uri)
-  #:use-module (web response)
+  #:use-module (curl)
   #:use-module (ice-9 receive)
   #:export (translate-installer))
 
+(define handle (curl-easy-init))
+
 (define (->google lang txt) 
   (define (-> lang txt)
-    (format #f "http://translate.google.com.hk/?langpair=~a&text=~a"
+    (format #f "https://translate.google.com.hk/?langpair=~a&text=~a"
             lang (uri-encode txt)))
   (catch #t
     (lambda () 
-      (http-get (-> lang txt) #:headers '((User-agent . "Mozilla/5.0"))))
+      (curl-easy-setopt handle 'url (-> lang txt))
+      (curl-easy-perform handle))
     (lambda e
       (values #f "网络有点不舒服，待会儿再试试..."))))
 
@@ -54,16 +56,12 @@
     "Are you kidding me?! What language do you want?")
    ((string-null? txt) "Are you mad? Where is the text to translate?!")
    (else 
-    (receive (r b) 
-        (->google lang txt) 
-      (cond
-       ((= (response-code r) 200)
-	(let* ((len (string-length b))
-	       (ret (->result (substring b (- len (+ 500 (string-length txt)))))))
-	  (if (string=? ret txt)
-	      "sorry I don't know."
-	      (format #f "it means: ~a" ret))))
-       (else (format #f "貌似股哥有点问题...(~a)" (response-code r))))))))
+    (let* ((body (->google lang txt))
+	   (len (string-length body))
+	   (ret (->result (substring body (- len (+ 500 (string-length txt)))))))
+      (if (string=? ret txt)
+	  "sorry I don't know."
+	  (format #f "it means: ~a" ret))))))
 
 (define (translate-installer irc)
   (lambda (msg)
