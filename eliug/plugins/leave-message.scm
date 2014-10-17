@@ -24,7 +24,7 @@
   #:export (leave-message-installer give-message-installer))
 
 (define leave-message-regex 
-  (string->irregex (format #f "~a[:, ：]*later tell ([^ ]+) (.*)$" *default-bot-name*)))
+  (string->irregex (format #f "~a[:, ：]*later tell ([^ :,.。，：]+)[:,.。，：]+(.*)$" *default-bot-name*)))
 
 (define (store-the-message who mg)
   (define f (string-append *default-msg-dir* "/" who))
