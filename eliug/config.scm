@@ -14,6 +14,7 @@
 ;;  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 (define-module (eliug config)
+  #:use-module (srfi srfi-1)
   #:export (*default-bot-name* *default-port* pick-a-server
             *default-channel* *default-msg-dir* current-channel))
 
@@ -25,9 +26,9 @@
 (define current-channel (make-parameter #f))
 
 (define *server-list*
-  '("banks.freenode.net"
+  '(;;"banks.freenode.net"
     "bradbury.freenode.net"
-    "brooks.freenode.net"
+    ;;"brooks.freenode.net"
     "roddenberry.freenode.net"
     "adams.freenode.net"
     "barjavel.freenode.net"
@@ -38,20 +39,26 @@
     "hobana.freenode.net"
     "holmes.freenode.net"
     "kornbluth.freenode.net"
-    "leguin.freenode.net"
+    ;;"leguin.freenode.net"
     "orwell.freenode.net"
     "pratchett.freenode.net"
     "rajaniemi.freenode.net"
     "sendak.freenode.net"
     "wolfe.freenode.net"
-    "asimov.freenode.net"
+    ;;"asimov.freenode.net"
     "card.freenode.net"
-    "dickson.freenode.net"
+    ;;"dickson.freenode.net"
     "hubbard.freenode.net"
     "moorcock.freenode.net"
     "morgan.freenode.net"
     "wright.freenode.net"))
 
-(define (pick-a-server)
-   (list-ref *server-list*
-	     (random (length *server-list*) *random-state*)))
+(define (gen-server-lst)
+  (apply circular-list *server-list*))
+
+(define pick-a-server
+  (let ((sl (gen-server-lst)))
+    (lambda ()
+      (let ((s (car sl)))
+	(set! sl (cdr sl))
+	s))))

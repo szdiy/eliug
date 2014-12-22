@@ -33,6 +33,7 @@
                    (server (pick-a-server))
                    (port *default-port*))
   (define irc (make-irc #:nick name #:server server #:port port))
+  (display server)(newline)
   (init-bot irc)
   irc)
 
@@ -47,9 +48,8 @@
     (lambda e
       (format #t "ERROR: ~a~%~!" e)
       (format #t "Restarting bot...~%~!")
-      (sleep 1)
       (do-quit irc)
-      (run-bot (make-bot #:name (nick irc)) channel))))
+      (run-bot (make-bot #:name (nick irc) #:server (pick-a-server)) channel))))
 
 (define (main)
   (setlocale LC_ALL "")
